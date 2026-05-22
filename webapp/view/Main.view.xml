@@ -1,0 +1,90 @@
+<mvc:View
+    controllerName="com.transferencia.armazens.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Page
+        title="{i18n>appTitle}"
+        class="sapUiContentPadding">
+
+        <content>
+            <VBox class="mainContainer">
+
+                <Panel
+                    headerText="🏭  Centro"
+                    class="sapUiResponsiveMargin">
+                    <VBox class="sapUiSmallMargin">
+                        <Label text="Selecione o centro de origem" />
+                        <Select
+                            id="selectPlanta"
+                            selectedKey="{view>/plantaSelecionada}"
+                            width="100%"
+                            change=".onPlantaChange" />
+                    </VBox>
+                </Panel>
+
+                <Panel
+                    headerText="📦  Depósito de Destino"
+                    class="sapUiResponsiveMargin">
+                    <VBox class="sapUiSmallMargin">
+                        <Label text="Selecione o depósito de destino" />
+                        <Select
+                            id="selectDeposito"
+                            selectedKey="{view>/depositoSelecionado}"
+                            width="100%"
+                            change=".onDepositoChange" />
+                    </VBox>
+                </Panel>
+
+                <Panel
+                    headerText="🔢  Adicionar SSCC"
+                    class="sapUiResponsiveMargin">
+                    <VBox class="sapUiSmallMargin">
+                        <Label text="Código SSCC (manual ou scanner)" />
+                        <Input
+                            id="ssccInput"
+                            value="{view>/novoSSCC}"
+                            placeholder="Ex: 900000290"
+                            submit=".onAdicionarSSCC" />
+                        <HBox class="sapUiSmallMarginTop" wrap="Wrap">
+                            <Button
+                                text="Adicionar"
+                                icon="sap-icon://add"
+                                press=".onAdicionarSSCC"
+                                class="btnAdicionar sapUiSmallMarginEnd sapUiSmallMarginBottom" />
+                            <Button
+                                text="Ver SSCCs disponíveis"
+                                icon="sap-icon://list"
+                                press=".onBrowseSSCC"
+                                class="btnBrowse sapUiSmallMarginBottom" />
+                        </HBox>
+                    </VBox>
+                </Panel>
+
+                <Panel
+                    headerText="📋  SSCCs Selecionados"
+                    class="sapUiResponsiveMargin">
+                    <List
+                        id="ssccList"
+                        items="{view>/ssccs}"
+                        noDataText="Nenhum SSCC adicionado ainda."
+                        mode="Delete"
+                        delete=".onDeleteSSCC">
+                        <StandardListItem
+                            title="{view>Exidv}"
+                            icon="sap-icon://shipping-status"
+                            iconInset="false" />
+                    </List>
+                </Panel>
+
+                <Button
+                    text="Gravar Transferência"
+                    icon="sap-icon://save"
+                    press=".onSave"
+                    class="saveButton sapUiResponsiveMargin" />
+
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

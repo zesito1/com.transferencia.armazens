@@ -1,0 +1,49 @@
+specVersion: "3.0"
+metadata:
+  name: com.transferencia.armazens
+type: application
+framework:
+  name: SAPUI5
+  version: "1.77.0"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: themelib_sap_fiori_3
+
+builder:
+  resources:
+    excludes:
+      - "test/e2e/**"
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateVersionInfo
+      configuration:
+        target:
+          url: http://192.168.50.111:8001
+          client: "404"
+        app:
+          name: ZZTRANSF_ARMAZ
+          package: $TMP
+          transport: ""
+        credentials:
+          username: "env:UI5_DEPLOY_USER"
+          password: "env:UI5_DEPLOY_PASSWORD"
+
+server:
+  customMiddleware:
+    - name: "@ui5/middleware-code-coverage"
+      afterMiddleware: compression
+      configuration:
+        excludePatterns:
+          - "resources/"
+          - "test/"
+    - name: ui5-middleware-livereload
+      afterMiddleware: compression
+    - name: ui5-middleware-simpleproxy
+      mountPath: /sap
+      afterMiddleware: compression
+      configuration:
+        baseUri: "http://192.168.50.111:8001/sap"
+        username: "CS4-XZA"
+        password: "Dekebra1!"
+        strictSSL: false

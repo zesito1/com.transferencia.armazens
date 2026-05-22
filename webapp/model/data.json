@@ -1,0 +1,31 @@
+{
+  "depositos": [
+    {
+      "id": "400",
+      "nome": "Armazém 400"
+    },
+    {
+      "id": "408",
+      "nome": "Armazém 408"
+    },
+    {
+      "id": "500",
+      "nome": "Armazém 500"
+    }
+  ],
+
+  "depositoSelecionado": "408",
+
+  "documento": "4980009211",
+
+  "novoSSCC": "",
+
+  "ssccs": [
+    {
+      "codigo": "SSCC 1"
+    },
+    {
+      "codigo": "SSCC 2"
+    }
+  ]
+}

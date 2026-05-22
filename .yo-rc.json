@@ -1,0 +1,18 @@
+{
+  "generator-ui5-app": {
+    "namespace": "com.transferencia.armazens",
+    "framework": "SAPUI5",
+    "frameworkVersion": "1.77.0",
+    "author": "INT\\zesito.almeida",
+    "initrepo": true,
+    "appId": "com.transferencia.armazens",
+    "appURI": "com/transferencia/armazens",
+    "cdnDomain": "ui5.sap.com",
+    "defaultTheme": "sap_fiori_3",
+    "qunitCoverageFile": "qunit-coverage.js",
+    "gte1_98_0": false,
+    "gte1_104_0": false,
+    "gte1_120_0": false,
+    "lt1_124_0": true
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "_version": "1.12.0",
+
+  "sap.app": {
+    "id": "com.transferencia.armazens",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": { "version": "1.0.0" },
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZLOG_HU_TRANS_STGL_SRV/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      }
+    }
+  },
+
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": {
+      "desktop": true, "tablet": true, "phone": true
+    }
+  },
+
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "com.transferencia.armazens.view.App",
+      "type": "XML",
+      "id": "app"
+    },
+
+    "resources": {
+      "css": [{ "uri": "css/style.css" }]
+    },
+
+    "dependencies": {
+      "minUI5Version": "1.77.0",
+      "libs": {
+        "sap.ui.core": {},
+        "sap.m": {}
+      }
+    },
+
+    "handleValidation": true,
+    "contentDensities": { "compact": true, "cozy": true },
+
+    "models": {
+      "": {
+        "dataSource": "mainService",
+        "preload": false,
+        "settings": {
+          "defaultBindingMode": "TwoWay",
+          "defaultCountMode": "Inline",
+          "useBatch": false,
+          "serviceUrlParams": {
+            "sap-client": "404"
+           }
+        }
+      },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "com.transferencia.armazens.i18n.i18n",
+          "supportedLocales": ["en", "de"],
+          "fallbackLocale": "en",
+          "async": true
+        }
+      }
+    },
+
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "viewPath": "com.transferencia.armazens.view",
+        "controlId": "app",
+        "controlAggregation": "pages",
+        "async": true
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "main",
+          "target": "main"
+        },
+        {
+          "pattern": "transferencia/{docNr}",
+          "name": "RouteTransferencia",
+          "target": "TargetTransferencia"
+        }
+      ],
+      "targets": {
+        "main": {
+          "viewId": "main",
+          "viewName": "Main"
+        },
+        "TargetTransferencia": {
+          "viewName": "Transferencia"
+        }
+      }
+    }
+  }
+}
