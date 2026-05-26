@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "2.5"
+metadata:
+  name: com.cc.tranferencia.armazens
+type: application
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          destination: ""
+          url: http://192.168.50.111:8001
+          client: "404"
+        credentials:
+          username: env:UI5_DEPLOY_USER
+          password: env:UI5_DEPLOY_PASSWORD
+        app:
+          name: ZUI5_LOG_TFSTGL
+          package: ZUI_LOG_HU_TRANS_STGL
+          transport: FE1K900082
+          description: ""

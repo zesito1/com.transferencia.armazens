@@ -7,7 +7,7 @@ sap.ui.define(["sap/ui/test/Opa5", "sap/ui/test/actions/Press"], function (Opa5,
 				iPressTheSayHelloButton: function () {
 					return this.waitFor({
 						id: "helloButton",
-						viewName: "com.transferencia.armazens.view.Main",
+						viewName: "com.cc.tranferencia.armazens.view.Main",
 						actions: new Press(),
 						errorMessage: "Did not find the 'Say Hello With Dialog' button on the App view"
 					});
@@ -17,7 +17,7 @@ sap.ui.define(["sap/ui/test/Opa5", "sap/ui/test/actions/Press"], function (Opa5,
 					return this.waitFor({
 						controlType: "sap.m.Button",
 						searchOpenDialogs: true,
-						viewName: "com.transferencia.armazens.view.Main",
+						viewName: "com.cc.tranferencia.armazens.view.Main",
 						actions: new Press(),
 						errorMessage: "Did not find the 'OK' button in the Dialog"
 					});

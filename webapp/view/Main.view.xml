@@ -1,5 +1,5 @@
 <mvc:View
-    controllerName="com.transferencia.armazens.controller.Main"
+    controllerName="com.cc.tranferencia.armazens.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
@@ -12,7 +12,7 @@
             <VBox class="mainContainer">
 
                 <Panel
-                    headerText="🏭  Centro"
+                    headerText="Centro"
                     class="sapUiResponsiveMargin">
                     <VBox class="sapUiSmallMargin">
                         <Label text="Selecione o centro de origem" />
@@ -25,7 +25,7 @@
                 </Panel>
 
                 <Panel
-                    headerText="📦  Depósito de Destino"
+                    headerText="Depósito de Destino"
                     class="sapUiResponsiveMargin">
                     <VBox class="sapUiSmallMargin">
                         <Label text="Selecione o depósito de destino" />
@@ -38,7 +38,7 @@
                 </Panel>
 
                 <Panel
-                    headerText="🔢  Adicionar SSCC"
+                    headerText="Adicionar SSCC"
                     class="sapUiResponsiveMargin">
                     <VBox class="sapUiSmallMargin">
                         <Label text="Código SSCC (manual ou scanner)" />
@@ -47,42 +47,55 @@
                             value="{view>/novoSSCC}"
                             placeholder="Ex: 900000290"
                             submit=".onAdicionarSSCC" />
-                        <HBox class="sapUiSmallMarginTop" wrap="Wrap">
-                            <Button
-                                text="Adicionar"
-                                icon="sap-icon://add"
-                                press=".onAdicionarSSCC"
-                                class="btnAdicionar sapUiSmallMarginEnd sapUiSmallMarginBottom" />
-                            <Button
-                                text="Ver SSCCs disponíveis"
-                                icon="sap-icon://list"
-                                press=".onBrowseSSCC"
-                                class="btnBrowse sapUiSmallMarginBottom" />
-                        </HBox>
+                        <Button
+                            text="Adicionar"
+                            icon="sap-icon://add"
+                            type="Emphasized"
+                            press=".onAdicionarSSCC"
+                            class="sapUiSmallMarginTop"
+                            width="100%" />
                     </VBox>
                 </Panel>
 
-                <Panel
-                    headerText="📋  SSCCs Selecionados"
-                    class="sapUiResponsiveMargin">
+                <Panel class="sapUiResponsiveMargin">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="SSCCs Selecionados" />
+                            <ToolbarSpacer />
+                            <Text id="ssccCounter" text="0 itens" />
+                        </Toolbar>
+                    </headerToolbar>
                     <List
                         id="ssccList"
                         items="{view>/ssccs}"
                         noDataText="Nenhum SSCC adicionado ainda."
                         mode="Delete"
                         delete=".onDeleteSSCC">
-                        <StandardListItem
+                        <ObjectListItem
                             title="{view>Exidv}"
-                            icon="sap-icon://shipping-status"
-                            iconInset="false" />
+                            number="{view>Vemng}"
+                            numberUnit="{view>Vemeh}"
+                            icon="sap-icon://package">
+                            <firstStatus>
+                                <ObjectStatus
+                                    text="{view>StatusText}"
+                                    state="{view>StatusState}"
+                                    visible="{= !!${view>StatusText} }" />
+                            </firstStatus>
+                            <attributes>
+                                <ObjectAttribute title="{view>Matnr}" text="{view>Maktx}" />
+                                <ObjectAttribute title="Lote" text="{view>Charg}" />
+                            </attributes>
+                        </ObjectListItem>
                     </List>
                 </Panel>
 
                 <Button
-                    text="Gravar Transferência"
+                    text="Transferir"
                     icon="sap-icon://save"
+                    type="Emphasized"
                     press=".onSave"
-                    class="saveButton sapUiResponsiveMargin" />
+                    class="sapUiResponsiveMargin saveButton" />
 
             </VBox>
         </content>

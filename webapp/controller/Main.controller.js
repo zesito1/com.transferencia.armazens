@@ -1,13 +1,14 @@
 sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel", "sap/m/MessageToast",
-  "sap/m/MessageBox","sap/m/SelectDialog", "sap/m/StandardListItem", "sap/ui/model/Filter",
-  "sap/ui/model/FilterOperator", "../model/ssccConfig"    
+  "sap/m/MessageBox", "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "../model/ssccConfig",
+  "sap/m/Dialog", "sap/m/Button", "sap/m/VBox", "sap/m/Text", "sap/m/Title", "sap/ui/core/Icon"
 ], function(Controller, JSONModel, MessageToast, MessageBox,
-            SelectDialog, StandardListItem, Filter, FilterOperator,
-            ssccConfig) {
+            Filter, FilterOperator,
+            ssccConfig,
+            Dialog, Button, VBox, Text, Title, Icon) {
   "use strict";
 
   return Controller.extend(
-    "com.transferencia.armazens.controller.Main", {
+    "com.cc.tranferencia.armazens.controller.Main", {
 
     onInit: function() {
       this.getView().setModel(new JSONModel({
@@ -53,82 +54,32 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel", "sap/
       });
     },
 
-    onBrowseSSCC: function() {
-      const oModel = this.getOwnerComponent().getModel();
-      const oView  = this.getView();
-      const that   = this;
+    onAdicionarSSCC: function() {
+      const oViewModel = this.getView().getModel("view");
+      const sCodigo    = (oViewModel.getProperty("/novoSSCC") || "").trim();
+      if (!sCodigo) { MessageToast.show("Introduza um código SSCC"); return; }
 
-      if (!this._oSSCCDialog) {
-        this._oSSCCDialog = new SelectDialog({
-          title: "SSCCs disponíveis",
-          multiSelect: true,
-          rememberSelections: false,
-          confirm: function(oEvent) {
-            const aContexts = oEvent.getParameter("selectedContexts");
-            if (!aContexts || aContexts.length === 0) { return; }
-
-            const oViewModel = oView.getModel("view");
-            const aSsccs     = oViewModel.getProperty("/ssccs");
-            let   iAdded     = 0;
-
-            aContexts.forEach(function(oCtx) {
-              const sExidv = oCtx.getObject().Exidv;
-              if (!aSsccs.some(function(s) { return s.Exidv === sExidv; })) {
-                aSsccs.push({ Exidv: sExidv });
-                iAdded++;
-              }
-            });
-
-            oViewModel.setProperty("/ssccs", aSsccs.slice());
-            MessageToast.show(
-              iAdded > 0 ? iAdded + " SSCC(s) adicionado(s)" : "SSCCs já estavam na lista"
-            );
-          },
-          search: function(oEvent) {
-            const sValue   = oEvent.getParameter("value").toLowerCase();
-            const oBinding = oEvent.getParameter("itemsBinding");
-            const oFilter  = new Filter("Exidv", function(sVal) {
-              return sVal.toLowerCase().includes(sValue);
-            });
-            oBinding.filter(sValue ? [oFilter] : []);
-          }
-        });
-
-        this._oSSCCDialog.setModel(new JSONModel({ items: [] }), "ssccBrowse");
-        this._oSSCCDialog.bindAggregation("items", {
-          path: "ssccBrowse>/items",
-          template: new StandardListItem({
-            title: "{ssccBrowse>Exidv}",
-            icon: "sap-icon://shipping-status"
-          })
-        });
-
-        oView.addDependent(this._oSSCCDialog);
+      const aSsccs = oViewModel.getProperty("/ssccs");
+      if (aSsccs.some(function(s) { return s.Exidv === sCodigo; })) {
+        MessageToast.show("SSCC já adicionado");
+        return;
       }
 
-      // Limpa e abre
-      this._oSSCCDialog.getModel("ssccBrowse").setProperty("/items", []);
-      this._oSSCCDialog.open();
-
-      const aFilters = ssccConfig.husDisponiveis.map(function(sHu) {
-        return new Filter("Exidv", FilterOperator.EQ, sHu);
+      aSsccs.push({
+        Exidv:       sCodigo,
+        Vemng:       "",
+        Vemeh:       "",
+        Charg:       "",
+        Matnr:       "",
+        Maktx:       "",
+        StatusText:  "A validar",
+        StatusState: "Warning"
       });
-
-      oModel.read("/SSCCSet", {
-        filters: [ new Filter({ filters: aFilters, and: false }) ],
-        success: function(oData) {
-          console.log("SSCCSet recebido:", oData.results.length, "itens");
-          if (oData.results.length === 0) {
-            MessageToast.show("Nenhum SSCC disponível de momento.");
-            return;
-          }
-          that._oSSCCDialog.getModel("ssccBrowse").setProperty("/items", oData.results);
-        },
-        error: function(oErr) {
-          MessageBox.error("Erro ao carregar SSCCs do servidor.");
-          console.error("SSCCSet erro:", oErr);
-        }
-      });
+      oViewModel.setProperty("/ssccs", aSsccs.slice());
+      oViewModel.setProperty("/novoSSCC", "");
+      this._updateCounter();
+      this.byId("ssccInput").focus();
+      this._validateSSCC(sCodigo);
     },
 
     onPlantaChange: function(oEvent) {
@@ -143,19 +94,90 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel", "sap/
       );
     },
 
-    onAdicionarSSCC: function() {
+
+    _validateSSCC: function(sExidv) {
       const oViewModel = this.getView().getModel("view");
-      const sCodigo    = (oViewModel.getProperty("/novoSSCC") || "").trim();
-      if (!sCodigo) { MessageToast.show("Introduza um código SSCC"); return; }
-      const aSsccs = oViewModel.getProperty("/ssccs");
-      if (aSsccs.some(function(s) { return s.Exidv === sCodigo; })) {
-        MessageToast.show("SSCC já adicionado"); return;
+
+      // ── VALIDAÇÃO LOCAL (temporária) ─────────────────────────────────────────
+      // Ativar caso o SSCCSet não tenha dados no cliente SAP.
+      // Para usar: comentar o bloco "VALIDAÇÃO REAL" abaixo e descomentar este.
+      /*
+      const aSsccsLocal = oViewModel.getProperty("/ssccs");
+      const iIdxLocal   = aSsccsLocal.findIndex(function(s) { return s.Exidv === sExidv; });
+      if (iIdxLocal === -1) { return; }
+      const oLocal = ssccConfig.husData.find(function(h) { return h.Exidv === sExidv; });
+      if (oLocal) {
+        aSsccsLocal[iIdxLocal] = {
+          Exidv: sExidv, Vemng: oLocal.Vemng || "", Vemeh: oLocal.Vemeh || "",
+          Charg: oLocal.Charg || "", Matnr: oLocal.Matnr || "", Maktx: oLocal.Maktx || "",
+          StatusText: "Válido", StatusState: "Success"
+        };
+      } else {
+        aSsccsLocal[iIdxLocal] = Object.assign({}, aSsccsLocal[iIdxLocal], {
+          StatusText: "SSCC não encontrado", StatusState: "Error"
+        });
       }
-      aSsccs.push({ Exidv: sCodigo });
-      oViewModel.setProperty("/ssccs", aSsccs.slice());
-      oViewModel.setProperty("/novoSSCC", "");
-      this.byId("ssccInput").focus();
-      MessageToast.show("SSCC adicionado");
+      oViewModel.setProperty("/ssccs", aSsccsLocal.slice());
+      */
+      // ── FIM VALIDAÇÃO LOCAL ───────────────────────────────────────────────────
+
+      // ── VALIDAÇÃO REAL (SAP backend via $filter) ─────────────────────────────
+      // Usa $filter em vez de chave direta para evitar validação ZHU/011.
+      const oModel = this.getOwnerComponent().getModel();
+      oModel.read("/SSCCSet", {
+        filters: [new Filter("Exidv", FilterOperator.EQ, sExidv)],
+        success: function(oData) {
+          const aSsccs = oViewModel.getProperty("/ssccs");
+          const iIdx   = aSsccs.findIndex(function(s) { return s.Exidv === sExidv; });
+          if (iIdx === -1) { return; }
+
+          if (oData.results && oData.results.length > 0) {
+            const oBackend = oData.results[0];
+            const oLocal   = ssccConfig.husData.find(function(h) { return h.Exidv === sExidv; }) || {};
+            aSsccs[iIdx] = {
+              Exidv:       sExidv,
+              Vemng:       oBackend.Vemng || oLocal.Vemng || "",
+              Vemeh:       oBackend.Vemeh || oLocal.Vemeh || "",
+              Charg:       oBackend.Charg || oLocal.Charg || "",
+              Matnr:       oBackend.Matnr || oLocal.Matnr || "",
+              Maktx:       oBackend.Maktx || oLocal.Maktx || "",
+              StatusText:  "Válido",
+              StatusState: "Success"
+            };
+          } else {
+            aSsccs[iIdx] = Object.assign({}, aSsccs[iIdx], {
+              StatusText:  "SSCC não encontrado",
+              StatusState: "Error"
+            });
+          }
+          oViewModel.setProperty("/ssccs", aSsccs.slice());
+        },
+        error: function(oErr) {
+          const aSsccs = oViewModel.getProperty("/ssccs");
+          const iIdx   = aSsccs.findIndex(function(s) { return s.Exidv === sExidv; });
+          if (iIdx === -1) { return; }
+          let sMsg = "Erro ao validar SSCC";
+          try {
+            const oError = JSON.parse(oErr.responseText);
+            sMsg = oError.error.message.value || sMsg;
+          } catch (e) {}
+          aSsccs[iIdx] = Object.assign({}, aSsccs[iIdx], {
+            StatusText:  sMsg,
+            StatusState: "Error"
+          });
+          oViewModel.setProperty("/ssccs", aSsccs.slice());
+        }
+      });
+      // ── FIM VALIDAÇÃO REAL ────────────────────────────────────────────────────
+    },
+
+    _updateCounter: function() {
+      const oViewModel = this.getView().getModel("view");
+      const aSsccs     = oViewModel.getProperty("/ssccs");
+      const oCounter   = this.byId("ssccCounter");
+      if (oCounter) {
+        oCounter.setText(aSsccs.length + (aSsccs.length === 1 ? " item" : " itens"));
+      }
     },
 
     onDeleteSSCC: function(oEvent) {
@@ -164,68 +186,79 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel", "sap/
       const aSsccs = oViewModel.getProperty("/ssccs");
       aSsccs.splice(parseInt(oCtx.getPath().split("/").pop(), 10), 1);
       oViewModel.setProperty("/ssccs", aSsccs.slice());
+      this._updateCounter();
     },
 
     onSave: function() {
-  const oViewModel = this.getView().getModel("view");
-  const oModel     = this.getOwnerComponent().getModel();
-  const sWerks     = oViewModel.getProperty("/plantaSelecionada");
-  const sLgort     = oViewModel.getProperty("/depositoSelecionado");
-  const aSsccs     = oViewModel.getProperty("/ssccs");
-  const that       = this;
+      const oViewModel = this.getView().getModel("view");
+      const oModel     = this.getOwnerComponent().getModel();
+      const sWerks     = oViewModel.getProperty("/plantaSelecionada");
+      const sLgort     = oViewModel.getProperty("/depositoSelecionado");
+      const aSsccs     = oViewModel.getProperty("/ssccs");
+      const that       = this;
 
-  if (!sWerks)        { MessageBox.warning("Selecione uma planta");         return; }
-  if (!sLgort)        { MessageBox.warning("Selecione um depósito");        return; }
-  if (!aSsccs.length) { MessageBox.warning("Adicione pelo menos um SSCC"); return; }
+      if (!sWerks)        { MessageBox.warning("Selecione uma planta");         return; }
+      if (!sLgort)        { MessageBox.warning("Selecione um depósito");        return; }
+      if (!aSsccs.length) { MessageBox.warning("Adicione pelo menos um SSCC"); return; }
 
-  oViewModel.setProperty("/busy", true);
-
-  const aFiltros = aSsccs.map(function(s) {
-    return new Filter("Exidv", FilterOperator.EQ, s.Exidv);
-  });
-
-  oModel.read("/SSCCSet", {
-    filters: [ new Filter({ filters: aFiltros, and: false }) ],
-    success: function(oData) {
-      const aValidos    = oData.results.map(function(r) { return r.Exidv; });
-      const aInvalidos  = aSsccs
-        .map(function(s) { return s.Exidv; })
-        .filter(function(sExidv) { return !aValidos.includes(sExidv); });
-
-      if (aInvalidos.length > 0) {
-        oViewModel.setProperty("/busy", false);
-        MessageBox.error(
-          "Os seguintes SSCCs não foram encontrados no sistema SAP:\n\n" +
-          aInvalidos.map(function(s) { return "• " + s; }).join("\n") +
-          "\n\nRemova-os da lista e tente novamente."
+      const aPendentes = aSsccs.filter(function(s) { return s.StatusState === "Warning"; });
+      if (aPendentes.length > 0) {
+        MessageBox.warning(
+          aPendentes.length + " SSCC(s) ainda em validação. Aguarde ou remova-os antes de transferir."
         );
         return;
       }
 
-      oModel.create("/DocumentSet", {
+      const aValidos  = aSsccs.filter(function(s) { return s.StatusState === "Success"; });
+      const aErros    = aSsccs.filter(function(s) { return s.StatusState === "Error"; });
+
+      if (!aValidos.length) {
+        MessageBox.warning("Não existem SSCCs válidos para transferir.");
+        return;
+      }
+
+      if (aErros.length > 0) {
+        MessageBox.confirm(
+          aErros.length + " SSCC(s) com erro serão ignorados.\n" +
+          "Pretende transferir apenas os " + aValidos.length + " SSCC(s) válido(s)?",
+          {
+            title: "SSCCs com erro",
+            onClose: function(sAction) {
+              if (sAction === MessageBox.Action.OK) {
+                that._executarTransferencia(oModel, sWerks, sLgort, aValidos, oViewModel);
+              }
+            }
+          }
+        );
+        return;
+      }
+
+      MessageBox.confirm(
+        "Vai transferir " + aValidos.length + " SSCC(s) para o depósito " + sLgort + ".\nConfirma?",
+        {
+          title:   "Confirmar Transferência",
+          onClose: function(sAction) {
+            if (sAction !== MessageBox.Action.OK) { return; }
+            that._executarTransferencia(oModel, sWerks, sLgort, aValidos, oViewModel);
+          }
+        }
+      );
+    },
+
+    _executarTransferencia: function(oModel, sWerks, sLgort, aValidos, oViewModel) {
+      const that = this;
+      oViewModel.setProperty("/busy", true);
+
+      oModel.create("/TransferSet", {
         Werks: sWerks,
         Lgort: sLgort,
-        DocumentToSSCC: {
-          results: aSsccs.map(function(s) { return { Exidv: s.Exidv }; })
+        TransferToSSCC: {
+          results: aValidos.map(function(s) { return { Exidv: s.Exidv }; })
         }
       }, {
         success: function(oData) {
-          console.log("Resposta completa do DocumentSet create:", JSON.stringify(oData));
           oViewModel.setProperty("/busy", false);
-          const sDocNr = oData.DocNr || "";
-          MessageBox.success(
-            "Transferência gravada!" + (sDocNr ? "\nDocumento: " + sDocNr : ""),
-            {
-              onClose: function() {
-                oViewModel.setProperty("/plantaSelecionada",   "");
-                oViewModel.setProperty("/depositoSelecionado", "");
-                oViewModel.setProperty("/ssccs", []);
-                that.getOwnerComponent().getRouter().navTo("RouteTransferencia", {
-                  docNr: sDocNr || "sem-documento"
-                });
-              }
-            }
-          );
+          that._showSuccessDialog(oData.DocNr || "", oViewModel);
         },
         error: function(oErr) {
           oViewModel.setProperty("/busy", false);
@@ -242,13 +275,63 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel", "sap/
         }
       });
     },
-    error: function() {
-      oViewModel.setProperty("/busy", false);
-      MessageBox.error("Não foi possível validar os SSCCs. Verifique a ligação ao servidor.");
-    }
-  });
-}
 
+    _showSuccessDialog: function(sDocNr, oViewModel) {
+      const oContent = new VBox({
+        alignItems: "Center",
+        items: [
+          new Icon({
+            src:   "sap-icon://accept",
+            size:  "3rem",
+            color: "Positive",
+            class: "sapUiSmallMarginBottom"
+          }),
+          new Title({
+            text:  "Transferência Concluída",
+            level: "H3",
+            class: "sapUiSmallMarginBottom"
+          }),
+          new Text({
+            text:    "A transferência foi gravada com sucesso no sistema SAP.",
+            wrapping: true,
+            textAlign: "Center",
+            class: "sapUiSmallMarginBottom"
+          })
+        ]
+      });
+
+      if (sDocNr) {
+        oContent.addItem(new Text({
+          text:  "Documento: " + sDocNr,
+          class: "sapUiSmallMarginTop"
+        }));
+      }
+
+      const that    = this;
+      const oDialog = new Dialog({
+        title:          "Transferência Concluída",
+        type:           "Message",
+        state:          "Success",
+        content:        oContent,
+        beginButton:    new Button({
+          text:  "Fechar",
+          type:  "Emphasized",
+          press: function() {
+            oDialog.close();
+          }
+        }),
+        afterClose: function() {
+          oDialog.destroy();
+          oViewModel.setProperty("/plantaSelecionada",   "");
+          oViewModel.setProperty("/depositoSelecionado", "");
+          oViewModel.setProperty("/ssccs", []);
+          that._updateCounter();
+        }
+      });
+
+      this.getView().addDependent(oDialog);
+      oDialog.open();
+    }
 
   });
 });

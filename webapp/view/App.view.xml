@@ -1,5 +1,5 @@
 <mvc:View
-    controllerName="com.transferencia.armazens.controller.App"
+    controllerName="com.cc.tranferencia.armazens.controller.App"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
 

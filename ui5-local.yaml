@@ -4,28 +4,15 @@ specVersion: "4.0"
 metadata:
   name: com.cc.tranferencia.armazens
 type: application
-
-builder:
-  resources:
-    excludes:
-      - "/test/**"
-      - "/localService/**"
-
+framework:
+  name: SAPUI5
+  version: "1.71.80"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: themelib_sap_fiori_3
 server:
   customMiddleware:
-    - name: fiori-tools-proxy
-      afterMiddleware: compression
-      configuration:
-        ignoreCertErrors: false
-        ui5:
-          path:
-            - /resources
-            - /test-resources
-          url: https://ui5.sap.com
-        backend:
-          - path: /sap
-            url: http://192.168.50.111:8001
-            client: '404'
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:
@@ -37,3 +24,11 @@ server:
       configuration:
         flp:
           theme: sap_horizon
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertErrors: false
+        backend:
+          - path: /sap
+            url: http://192.168.50.111:8001
+            client: '404'

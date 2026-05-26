@@ -1,6 +1,6 @@
 specVersion: "4.0"
 metadata:
-  name: com.transferencia.armazens
+  name: com.cc.tranferencia.armazens
 type: application
 resources:
   configuration:

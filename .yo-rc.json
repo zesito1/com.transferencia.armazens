@@ -1,11 +1,11 @@
 {
   "generator-ui5-app": {
-    "namespace": "com.transferencia.armazens",
+    "namespace": "com.cc.tranferencia.armazens",
     "framework": "SAPUI5",
     "frameworkVersion": "1.77.0",
     "author": "INT\\zesito.almeida",
     "initrepo": true,
-    "appId": "com.transferencia.armazens",
+    "appId": "com.cc.tranferencia.armazens",
     "appURI": "com/transferencia/armazens",
     "cdnDomain": "ui5.sap.com",
     "defaultTheme": "sap_fiori_3",
