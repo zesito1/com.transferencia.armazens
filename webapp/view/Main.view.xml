@@ -8,7 +8,7 @@
         title="{i18n>appTitle}">
 
         <content>
-            <VBox>
+            <VBox width="100%">
 
                 <Panel
                     headerText="Centro"
@@ -72,7 +72,8 @@
                         delete=".onDeleteSSCC">
                         <ObjectListItem
                             title="{view>Exidv}"
-                            icon="sap-icon://package">
+                            number="{view>Vemng}"
+                            numberUnit="{view>Vemeh}">
                             <firstStatus>
                                 <ObjectStatus
                                     text="{view>StatusText}"
@@ -80,9 +81,7 @@
                                     visible="{= !!${view>StatusText} }" />
                             </firstStatus>
                             <attributes>
-                                <ObjectAttribute title="Quantidade" text="{= ${view>Vemng} + ' ' + ${view>Vemeh} }" />
-                                <ObjectAttribute title="Material" text="{view>Matnr}" />
-                                <ObjectAttribute title="Descrição" text="{view>Maktx}" />
+                                <ObjectAttribute title="Material" text="{= ${view>Maktx} + ' (' + ${view>Matnr} + ')' }" />
                                 <ObjectAttribute title="Lote" text="{view>Charg}" />
                             </attributes>
                         </ObjectListItem>
