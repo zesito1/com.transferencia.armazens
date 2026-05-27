@@ -1,10 +1,6 @@
-sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel", "sap/m/MessageToast",
-  "sap/m/MessageBox", "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "../model/ssccConfig",
-  "sap/m/Dialog", "sap/m/Button", "sap/m/VBox", "sap/m/Text", "sap/m/Title", "sap/ui/core/Icon"
-], function(Controller, JSONModel, MessageToast, MessageBox,
-            Filter, FilterOperator,
-            ssccConfig,
-            Dialog, Button, VBox, Text, Title, Icon) {
+sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/model/json/JSONModel", "sap/m/MessageToast",
+  "sap/m/MessageBox", "../model/ssccConfig"
+], function(Controller, JSONModel, MessageToast, MessageBox, ssccConfig) {
   "use strict";
 
   return Controller.extend(
@@ -121,51 +117,38 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel", "sap/
       */
       // ── FIM VALIDAÇÃO LOCAL ───────────────────────────────────────────────────
 
-      // ── VALIDAÇÃO REAL (SAP backend via $filter) ─────────────────────────────
-      // Usa $filter em vez de chave direta para evitar validação ZHU/011.
+      // ── VALIDAÇÃO REAL (SAP backend — GET ENTITY por chave direta) ──────────
       const oModel = this.getOwnerComponent().getModel();
-      oModel.read("/SSCCSet", {
-        filters: [new Filter("Exidv", FilterOperator.EQ, sExidv)],
+      oModel.read("/SSCCSet('" + sExidv + "')", {
         success: function(oData) {
           const aSsccs = oViewModel.getProperty("/ssccs");
           const iIdx   = aSsccs.findIndex(function(s) { return s.Exidv === sExidv; });
           if (iIdx === -1) { return; }
-
-          if (oData.results && oData.results.length > 0) {
-            const oBackend = oData.results[0];
-            const oLocal   = ssccConfig.husData.find(function(h) { return h.Exidv === sExidv; }) || {};
-            aSsccs[iIdx] = {
-              Exidv:       sExidv,
-              Vemng:       oBackend.Vemng || oLocal.Vemng || "",
-              Vemeh:       oBackend.Vemeh || oLocal.Vemeh || "",
-              Charg:       oBackend.Charg || oLocal.Charg || "",
-              Matnr:       oBackend.Matnr || oLocal.Matnr || "",
-              Maktx:       oBackend.Maktx || oLocal.Maktx || "",
-              StatusText:  "Válido",
-              StatusState: "Success"
-            };
-          } else {
-            aSsccs[iIdx] = Object.assign({}, aSsccs[iIdx], {
-              StatusText:  "SSCC não encontrado",
-              StatusState: "Error"
-            });
-          }
+          aSsccs[iIdx] = {
+            Exidv:       sExidv,
+            Vemng:       oData.Vemng || "",
+            Vemeh:       oData.Vemeh || "",
+            Charg:       oData.Charg || "",
+            Matnr:       oData.Matnr || "",
+            Maktx:       oData.Maktx || "",
+            StatusText:  "Válido",
+            StatusState: "Success"
+          };
           oViewModel.setProperty("/ssccs", aSsccs.slice());
         },
         error: function(oErr) {
           const aSsccs = oViewModel.getProperty("/ssccs");
           const iIdx   = aSsccs.findIndex(function(s) { return s.Exidv === sExidv; });
-          if (iIdx === -1) { return; }
-          let sMsg = "Erro ao validar SSCC";
+          if (iIdx !== -1) {
+            aSsccs.splice(iIdx, 1);
+            oViewModel.setProperty("/ssccs", aSsccs.slice());
+          }
+          let sMsg = "SSCC '" + sExidv + "' não encontrado.";
           try {
             const oError = JSON.parse(oErr.responseText);
             sMsg = oError.error.message.value || sMsg;
           } catch (e) {}
-          aSsccs[iIdx] = Object.assign({}, aSsccs[iIdx], {
-            StatusText:  sMsg,
-            StatusState: "Error"
-          });
-          oViewModel.setProperty("/ssccs", aSsccs.slice());
+          MessageToast.show(sMsg);
         }
       });
       // ── FIM VALIDAÇÃO REAL ────────────────────────────────────────────────────
@@ -277,60 +260,20 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel", "sap/
     },
 
     _showSuccessDialog: function(sDocNr, oViewModel) {
-      const oContent = new VBox({
-        alignItems: "Center",
-        items: [
-          new Icon({
-            src:   "sap-icon://accept",
-            size:  "3rem",
-            color: "Positive",
-            class: "sapUiSmallMarginBottom"
-          }),
-          new Title({
-            text:  "Transferência Concluída",
-            level: "H3",
-            class: "sapUiSmallMarginBottom"
-          }),
-          new Text({
-            text:    "A transferência foi gravada com sucesso no sistema SAP.",
-            wrapping: true,
-            textAlign: "Center",
-            class: "sapUiSmallMarginBottom"
-          })
-        ]
-      });
+      const that = this;
+      const sMsg = sDocNr
+        ? "Transferência efetuada com sucesso.\nDocumento: " + sDocNr
+        : "Transferência efetuada com sucesso.";
 
-      if (sDocNr) {
-        oContent.addItem(new Text({
-          text:  "Documento: " + sDocNr,
-          class: "sapUiSmallMarginTop"
-        }));
-      }
-
-      const that    = this;
-      const oDialog = new Dialog({
-        title:          "Transferência Concluída",
-        type:           "Message",
-        state:          "Success",
-        content:        oContent,
-        beginButton:    new Button({
-          text:  "Fechar",
-          type:  "Emphasized",
-          press: function() {
-            oDialog.close();
-          }
-        }),
-        afterClose: function() {
-          oDialog.destroy();
+      MessageBox.success(sMsg, {
+        title: "Sucesso",
+        onClose: function() {
           oViewModel.setProperty("/plantaSelecionada",   "");
           oViewModel.setProperty("/depositoSelecionado", "");
           oViewModel.setProperty("/ssccs", []);
           that._updateCounter();
         }
       });
-
-      this.getView().addDependent(oDialog);
-      oDialog.open();
     }
 
   });

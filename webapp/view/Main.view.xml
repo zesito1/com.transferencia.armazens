@@ -5,11 +5,10 @@
     xmlns:core="sap.ui.core">
 
     <Page
-        title="{i18n>appTitle}"
-        class="sapUiContentPadding">
+        title="{i18n>appTitle}">
 
         <content>
-            <VBox class="mainContainer">
+            <VBox>
 
                 <Panel
                     headerText="Centro"
@@ -73,8 +72,6 @@
                         delete=".onDeleteSSCC">
                         <ObjectListItem
                             title="{view>Exidv}"
-                            number="{view>Vemng}"
-                            numberUnit="{view>Vemeh}"
                             icon="sap-icon://package">
                             <firstStatus>
                                 <ObjectStatus
@@ -83,7 +80,9 @@
                                     visible="{= !!${view>StatusText} }" />
                             </firstStatus>
                             <attributes>
-                                <ObjectAttribute title="{view>Matnr}" text="{view>Maktx}" />
+                                <ObjectAttribute title="Quantidade" text="{= ${view>Vemng} + ' ' + ${view>Vemeh} }" />
+                                <ObjectAttribute title="Material" text="{view>Matnr}" />
+                                <ObjectAttribute title="Descrição" text="{view>Maktx}" />
                                 <ObjectAttribute title="Lote" text="{view>Charg}" />
                             </attributes>
                         </ObjectListItem>
