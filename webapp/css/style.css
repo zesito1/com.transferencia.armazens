@@ -1,3 +1,9 @@
 .saveButton.sapMBtn {
     width: 100%;
 }
+
+.mainContent {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}

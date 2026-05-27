@@ -8,26 +8,22 @@
         title="{i18n>appTitle}">
 
         <content>
-            <VBox width="100%">
+            <VBox width="100%" class="mainContent">
 
                 <Panel
-                    headerText="Centro"
+                    headerText="Destino"
                     class="sapUiResponsiveMargin">
                     <VBox class="sapUiSmallMargin">
-                        <Label text="Selecione o centro de origem" />
+                        <Label text="Centro:" />
                         <Select
                             id="selectPlanta"
                             selectedKey="{view>/plantaSelecionada}"
                             width="100%"
                             change=".onPlantaChange" />
-                    </VBox>
-                </Panel>
-
-                <Panel
-                    headerText="Depósito de Destino"
-                    class="sapUiResponsiveMargin">
-                    <VBox class="sapUiSmallMargin">
-                        <Label text="Selecione o depósito de destino" />
+                        <Label
+                            text="Depósito Destino:"
+                            required="true"
+                            class="sapUiSmallMarginTop" />
                         <Select
                             id="selectDeposito"
                             selectedKey="{view>/depositoSelecionado}"
@@ -37,22 +33,25 @@
                 </Panel>
 
                 <Panel
-                    headerText="Adicionar SSCC"
+                    headerText="SSCC's"
                     class="sapUiResponsiveMargin">
                     <VBox class="sapUiSmallMargin">
                         <Label text="Código SSCC (manual ou scanner)" />
-                        <Input
-                            id="ssccInput"
-                            value="{view>/novoSSCC}"
-                            placeholder="Ex: 900000290"
-                            submit=".onAdicionarSSCC" />
-                        <Button
-                            text="Adicionar"
-                            icon="sap-icon://add"
-                            type="Emphasized"
-                            press=".onAdicionarSSCC"
-                            class="sapUiSmallMarginTop"
-                            width="100%" />
+                        <HBox width="100%" alignItems="Center">
+                            <Input
+                                id="ssccInput"
+                                value="{view>/novoSSCC}"
+                                placeholder="Ex: 900000290"
+                                submit=".onAdicionarSSCC">
+                                <layoutData>
+                                    <FlexItemData growFactor="1" />
+                                </layoutData>
+                            </Input>
+                            <Button
+                                icon="sap-icon://add"
+                                type="Emphasized"
+                                press=".onAdicionarSSCC" />
+                        </HBox>
                     </VBox>
                 </Panel>
 
@@ -61,7 +60,7 @@
                         <Toolbar>
                             <Title text="SSCCs Selecionados" />
                             <ToolbarSpacer />
-                            <Text id="ssccCounter" text="0 itens" />
+                            <Title id="ssccCounter" text="0 itens" level="H4" />
                         </Toolbar>
                     </headerToolbar>
                     <List
