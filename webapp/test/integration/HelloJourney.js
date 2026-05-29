@@ -1,4 +1,4 @@
-/* global QUnit */
+﻿/* global QUnit */
 sap.ui.define(["sap/ui/test/opaQunit", "./pages/Main"], function (opaTest) {
 	"use strict";
 
@@ -8,7 +8,7 @@ sap.ui.define(["sap/ui/test/opaQunit", "./pages/Main"], function (opaTest) {
 		// Arrangements
 		Given.iStartMyUIComponent({
 			componentConfig: {
-				name: "com.cc.tranferencia.armazens"
+				name: "com.cc.transferencia.armazens"
 			}
 		});
 
@@ -32,7 +32,7 @@ sap.ui.define(["sap/ui/test/opaQunit", "./pages/Main"], function (opaTest) {
 		// Arrangements
 		Given.iStartMyUIComponent({
 			componentConfig: {
-				name: "com.cc.tranferencia.armazens"
+				name: "com.cc.transferencia.armazens"
 			}
 		});
 

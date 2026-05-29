@@ -1,8 +1,8 @@
-# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+﻿# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
 
 specVersion: "4.0"
 metadata:
-  name: com.cc.tranferencia.armazens
+  name: com.cc.transferencia.armazens
 type: application
 framework:
   name: SAPUI5

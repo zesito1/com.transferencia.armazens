@@ -1,10 +1,10 @@
-sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/model/json/JSONModel", "sap/m/MessageToast",
+﻿sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/model/json/JSONModel", "sap/m/MessageToast",
   "sap/m/MessageBox", "../model/ssccConfig"
 ], function(Controller, JSONModel, MessageToast, MessageBox, ssccConfig) {
   "use strict";
 
   return Controller.extend(
-    "com.cc.tranferencia.armazens.controller.Main", {
+    "com.cc.transferencia.armazens.controller.Main", {
 
     onInit: function() {
       this.getView().setModel(new JSONModel({
