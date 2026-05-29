@@ -78,6 +78,15 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/model/json/JSONModel", "sap
       this._validateSSCC(sCodigo);
     },
 
+    onLimpar: function() {
+      const oViewModel = this.getView().getModel("view");
+      oViewModel.setProperty("/plantaSelecionada",   "");
+      oViewModel.setProperty("/depositoSelecionado", "");
+      oViewModel.setProperty("/novoSSCC",            "");
+      oViewModel.setProperty("/ssccs",               []);
+      this._updateCounter();
+    },
+
     onPlantaChange: function(oEvent) {
       this.getView().getModel("view").setProperty(
         "/plantaSelecionada", oEvent.getParameter("selectedItem").getKey()

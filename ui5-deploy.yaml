@@ -23,5 +23,5 @@ builder:
         app:
           name: ZUI5_LOG_TFSTGL
           package: ZUI_LOG_HU_TRANS_STGL
-          transport: FE1K900082
+          transport: FE1K900110
           description: ""

@@ -87,14 +87,26 @@
                     </List>
                 </Panel>
 
-                <Button
-                    text="Transferir"
-                    icon="sap-icon://save"
-                    type="Emphasized"
-                    press=".onSave"
-                    class="sapUiResponsiveMargin saveButton" />
-
             </VBox>
         </content>
+
+        <footer>
+            <Bar>
+                <contentLeft>
+                    <Button
+                        text="Limpar"
+                        icon="sap-icon://clear-all"
+                        press=".onLimpar" />
+                </contentLeft>
+                <contentRight>
+                    <Button
+                        text="Transferir"
+                        icon="sap-icon://save"
+                        type="Emphasized"
+                        press=".onSave" />
+                </contentRight>
+            </Bar>
+        </footer>
+
     </Page>
 </mvc:View>
