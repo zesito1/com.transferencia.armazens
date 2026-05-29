@@ -1,4 +1,4 @@
-﻿sap.ui.define(["./BaseController"], function (BaseController) {
+sap.ui.define(["./BaseController"], function (BaseController) {
 	"use strict";
 
 	return BaseController.extend("com.cc.transferencia.armazens.controller.App", {

@@ -1,4 +1,4 @@
-﻿<mvc:View
+<mvc:View
     controllerName="com.cc.transferencia.armazens.controller.App"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
